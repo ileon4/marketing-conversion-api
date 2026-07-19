@@ -1,116 +1,103 @@
 # Marketing Conversion Prediction API
 
----------------------------------------
+A production-ready machine learning REST API for predicting customer conversion probability using FastAPI, Docker, and Render.
 
-🚀 Live Demo
+## Live Demo
 
-🔗 API URL - https://marketing-conversion-api.onrender.com/
-
-🔗 Swagger Documentation - https://marketing-conversion-api.onrender.com/docs
-
----------------------------------------
+- API URL: https://marketing-conversion-api.onrender.com/
+- Swagger Docs: https://marketing-conversion-api.onrender.com/docs
 
 ## Overview
 
-A developed and deployed containerized machine learning REST API using FastAPI and Docker on Render, enabling real-time customer conversion predictions with a production-ready inference pipeline.
+This project demonstrates an end-to-end machine learning deployment workflow by serving a Random Forest classification model through a FastAPI REST API. The application is containerized with Docker and deployed on Render, enabling real-time customer conversion predictions through a publicly accessible API.
 
 ## Business Problem
 
-A business is noticing more customers are canceling their subscriptions. They need a way to identify if a customer is likely to churn before they do so that targeted marketing strategies can be executed to retain these customers.
+Marketing teams invest significant resources into acquiring leads, but not every prospect is equally likely to convert. This project predicts the probability that a customer will convert based on demographic, behavioral, and marketing engagement features, enabling businesses to prioritize high-value prospects and optimize sales outreach.
 
-## Features
+## Feature Inputs
 
-"age"
-"annual_income"
-"country"
-"device_type"
-"traffic_source"
-"campaign_type"
-"pages_visited"
-"session_duration"
-"email_opens"
-"email_clicks"
-"previous_purchases"
-"days_since_last_visit"
-"discount_offered"
-"ad_spend"
+- Age
+- Annual income
+- Country
+- Device type
+- Traffic source
+- Campaign type
+- Pages visited
+- Session duration
+- Email opens
+- Email clicks
+- Previous purchases
+- Days since last visit
+- Discount offered
+- Ad spend
 
 ## Tech Stack
 
-Python
-FastAPI
-Docker
-Render
+- Python
+- scikit-learn
+- FastAPI
+- Pydantic
+- Docker
+- Render
+- pandas
+- NumPy
 
 ## Architecture Diagram
 
-Marketing Data
-        │
-        ▼
-Training Pipeline
-        │
-        ▼
-Random Forest Model
-        │
-        ▼
-    joblib
-        │
-        ▼
-    FastAPI
-        │
-        ▼
-    Docker
-        │
-        ▼
-    Render
-        │
-        ▼
-    Public API
+```mermaid
+flowchart TD
+                A[Marketing Data] --> B[Training Pipeline]
+                B --> C[Random Forest Model]
+                C --> D[joblib Artifact]
+                D --> E[FastAPI App]
+                E --> F[Docker Container]
+                F --> G[Render Deployment]
+                G --> H[Public API]
+```
 
 ## Machine Learning Pipeline
 
-Raw Customer Data
-        │
-        ▼
-Train / Test Split
-        │
-        ▼
-ColumnTransformer
-   ├── "passthrough" (numeric features)
-   └── OneHotEncoder (categorical features)
-        │
-        ▼
-Random Forest Classifier
-        │
-        ▼
-scikit-learn Pipeline
-        │
-        ▼
-Serialized with joblib
-        │
-        ▼
-Loaded by FastAPI for real-time inference
+```mermaid
+flowchart TD
+                A[Raw Customer Data] --> B[Train Test Split]
+                B --> C[ColumnTransformer]
+                C --> C1[Numeric Features passthrough]
+                C --> C2[Categorical Features OneHotEncoder]
+                C1 --> D[Random Forest Classifier]
+                C2 --> D
+                D --> E[scikit-learn Pipeline]
+                E --> F[Serialize with joblib]
+                F --> G[Load in FastAPI for real-time inference]
+```
 
 ## Project Structure
 
+```text
 marketing-conversion-api/
-│
 ├── app/
+│   ├── __init__.py
 │   ├── main.py
 │   ├── predictor.py
 │   └── schemas.py
-│
-├── training/
-│   ├── train.py
-│   └── generate_data.py
-│
 ├── data/
+│   └── marketing_conversion_data.csv
 ├── models/
+│   └── marketing_conversion_model.joblib
 ├── notebooks/
+│   └── marketing_eda.ipynb
+├── reports/
+│   └── metrics.json
+├── tests/
+├── training/
+│   ├── __init__.py
+│   ├── generate_data.py
+│   └── train.py
 ├── Dockerfile
-├── .dockerignore
-├── pyproject.toml
-└── uv.lock
+├── README.md
+├── main.py
+└── pyproject.toml
+```
 
 ## Installation
 
@@ -121,57 +108,53 @@ marketing-conversion-api/
 - Docker Desktop (optional for containerized deployment)
 - Git
 
-### Clone the repository
+### Clone the Repository
 
 ```bash
 git clone https://github.com/ileon4/marketing-conversion-api.git
 cd marketing-conversion-api
 ```
 
-### Install dependencies
+### Install Dependencies
 
 ```bash
 uv sync
 ```
 
-### Run the API locally
+### Run the API Locally
 
 ```bash
 uv run uvicorn app.main:app --reload
 ```
 
-Open:
-
-http://127.0.0.1:8000/docs
+Open: http://127.0.0.1:8000/docs
 
 ## Docker Usage
 
-Build the Docker image:
+### Build Image
 
 ```bash
 docker build -t marketing-conversion-api .
 ```
 
-Run the container:
+### Run Container
 
 ```bash
 docker run \
---name marketing-conversion-container \
--p 8000:8000 \
-marketing-conversion-api
+        --name marketing-conversion-container \
+        -p 8000:8000 \
+        marketing-conversion-api
 ```
 
-Once the container is running, open:
+Open: http://127.0.0.1:8000/docs
 
-http://127.0.0.1:8000/docs
-
-To stop the container:
+### Stop Container
 
 ```bash
 docker stop marketing-conversion-container
 ```
 
-## API Documentation
+## API Endpoints
 
 ### Live API
 
@@ -183,28 +166,38 @@ https://marketing-conversion-api.onrender.com/docs
 
 ### Health Check
 
-**GET /**
+Endpoint: GET /
 
-Returns:
+Response:
 
 ```json
 {
-    "message": "Marketing Conversion API is running!"
+        "message": "Marketing Conversion API is running!"
 }
 ```
 
 ### Predict Customer Conversion
 
-**POST /predict**
+Endpoint: POST /predict
 
 Request:
 
 ```json
 {
-  "age": 42,
-  "annual_income": 95000,
-  "country": "United States",
-  ...
+        "age": 42,
+        "annual_income": 95000,
+        "country": "United States",
+        "device_type": "Mobile",
+        "traffic_source": "Organic Search",
+        "campaign_type": "Email",
+        "pages_visited": 12,
+        "session_duration": 390,
+        "email_opens": 4,
+        "email_clicks": 2,
+        "previous_purchases": 3,
+        "days_since_last_visit": 7,
+        "discount_offered": 10,
+        "ad_spend": 45.5
 }
 ```
 
@@ -212,23 +205,29 @@ Response:
 
 ```json
 {
-  "prediction": "Highly Likely to Convert",
-  "conversion_probability": 0.9557,
-  "recommendation": "This customer appears to be a strong prospect. Recommend immediate sales outreach."
+        "prediction": "Highly Likely to Convert",
+        "conversion_probability": 0.9557,
+        "recommendation": "This customer appears to be a strong prospect. Recommend immediate sales outreach."
 }
 ```
 
 ## Model Performance
 
-found in reports folder
+Metrics are generated by training/train.py and saved in reports/metrics.json.
 
-accuracy: 0.7104,
-precision: 0.6180785612872692,
-recall: 0.6707755521314843,
-f1_score: 0.6433497536945813,
-roc_auc: 0.7820059954331885,
-confusion_matrix:
-[2246, 807]
-[641, 1306]
+| Metric | Value |
+| --- | ---: |
+| Accuracy | 0.7104 |
+| Precision | 0.6180785612872692 |
+| Recall | 0.6707755521314843 |
+| F1-score | 0.6433497536945813 |
+| ROC-AUC | 0.7820059954331885 |
+
+Confusion Matrix:
+
+| Actual \ Predicted | Negative | Positive |
+| --- | ---: | ---: |
+| Negative | 2246 | 807 |
+| Positive | 641 | 1306 |
 
 Note: Performance metrics are reported on a held-out test set generated from the synthetic marketing conversion dataset. The primary objective of this project is to demonstrate an end-to-end machine learning deployment workflow rather than optimize a production model.
