@@ -1,10 +1,18 @@
+import json
 from pathlib import Path
 
 import joblib
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, roc_auc_score
+from sklearn.metrics import (
+    accuracy_score,
+    confusion_matrix,
+    f1_score,
+    precision_score,
+    recall_score,
+    roc_auc_score,
+)
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
@@ -13,6 +21,8 @@ from sklearn.preprocessing import OneHotEncoder
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_PATH = PROJECT_ROOT / "data" / "marketing_conversion_data.csv"
 MODEL_PATH = PROJECT_ROOT / "models" / "marketing_conversion_model.joblib"
+REPORTS_DIR = PROJECT_ROOT / "reports"
+METRICS_PATH = REPORTS_DIR / "metrics.json"
 
 
 df = pd.read_csv(DATA_PATH)
@@ -77,12 +87,20 @@ pipeline.fit(X_train, y_train)
 predictions = pipeline.predict(X_test)
 predicted_proba = pipeline.predict_proba(X_test)[:, 1]
 
-print("Classification Report:")
-print(classification_report(y_test, predictions))
+metrics = {
+    "accuracy": float(accuracy_score(y_test, predictions)),
+    "precision": float(precision_score(y_test, predictions, zero_division=0)),
+    "recall": float(recall_score(y_test, predictions, zero_division=0)),
+    "f1_score": float(f1_score(y_test, predictions, zero_division=0)),
+    "roc_auc": float(roc_auc_score(y_test, predicted_proba)),
+    "confusion_matrix": confusion_matrix(y_test, predictions).tolist(),
+}
 
-print("ROC-AUC:")
-print(roc_auc_score(y_test, predicted_proba))
+REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+with METRICS_PATH.open("w", encoding="utf-8") as metrics_file:
+    json.dump(metrics, metrics_file, indent=2)
 
 joblib.dump(pipeline, MODEL_PATH)
 
 print(f"Model saved to {MODEL_PATH}")
+print(f"Metrics saved to {METRICS_PATH}")
